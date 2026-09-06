@@ -20,7 +20,7 @@ Laravel 10.xを使用したお問い合わせフォームアプリケーショ�
 
 ### 1. Laravelプロジェクトの作成
 
-Laravel 10.xを指定してプロジェクトを作成します。
+Laravel 10.xを指定してプロジェクトを作成
 
 ```bash
 docker run --rm \
@@ -60,6 +60,14 @@ docker run --rm \
 
 ### 3. PHP / Laravel / MySQLのバージョン確認
 
+**※確認方法**
+
+```bash
+sail php --version
+sail artisan --version
+sail mysql --version
+```
+
 技術スタックが指定と異なった為、下記要領にてPHP/MySQLを変更
 
 ```text
@@ -75,15 +83,7 @@ Dockerイメージを再ビルド
 バージョン確認
 ```
 
-**※確認方法**
-
-```bash
-sail php --version
-sail artisan --version
-sail mysql --version
-```
-
-**MySQLのバージョン変更によるエラー**
+**MySQLのバージョン変更によるエラー**<br>
 MySQL 8.4から8.0へ変更した際、既存のMySQLボリュームに8.4のデータが残っていたため、MySQLのダウングレードエラーが発生。下記コマンドでボリュームを削除し、再構築。
 
 ```bash
@@ -105,15 +105,15 @@ phpMyAdminをDocker Composeに追加し、ブラウザからMySQLデータベー
 
 **追加したコード（MySQLと同じインデントへ）**
 
-```bash
+```yaml
 phpmyadmin:
-    image: 'phpmyadmin:latest'
+    image: "phpmyadmin:latest"
     ports:
-        - '${FORWARD_PHPMYADMIN_PORT:-8080}:80'
+        - "${FORWARD_PHPMYADMIN_PORT:-8080}:80"
     environment:
         PMA_HOST: mysql
-        PMA_USER: '${DB_USERNAME}'
-        PMA_PASSWORD: '${DB_PASSWORD}'
+        PMA_USER: "${DB_USERNAME}"
+        PMA_PASSWORD: "${DB_PASSWORD}"
     networks:
         - sail
     depends_on:
@@ -122,6 +122,56 @@ phpmyadmin:
 
 ### 6. フロントエンド環境
 
+提供頂いたbladeファイルに伴い、Tailwind CSS及びAlpine.jsをインストール・設定
+
+**Tailwind CSSのインストール**
+
+```bash
+sail npm install -D tailwindcss@^3.4.0 postcss autoprefixer
+```
+
+**Alpine.jsのインストール**
+
+```bash
+sail npm install alpinejs
+```
+
+**Tailwind CSSの設定ファイル作成**
+
+```bash
+sail npx tailwindcss init -p
+```
+
+**tailwind.config.jsの設定**
+
+```js
+/** @type {import("tailwindcss").Config */
+export default {
+    content: [
+        "./resources/**/*.blade.php",
+        "./resources/**/*.js",
+        "./resources/**/*.vue",
+    ],
+    theme: {
+        extend: {},
+    },
+    plugins: [],
+};
+```
+
+**Bladeファイルの配置**<br>
+提供されたBladeファイルをresourcesディレクトリへ配置
+
+**Viteの起動**
+※Vite：CSSやJavaScriptなどのフロントエンドファイルを監視・ビルドしてくれる開発用サーバー<br>
+※**注意点**：CSS・JavaScriptなどのフロントエンド処理が発生する場合に、**別のターミナル**で起動する。
+
+```bash
+sail npm run dev
+```
+
 ## ER図
+
+users / categories / contacts / tags / contact_tag テーブルのリレーションを表したER図
 
 ![ER図](docs/er-diagram.png)
