@@ -121,3 +121,7 @@ phpmyadmin:
 ```
 
 ### 6. フロントエンド環境
+
+## ER図
+
+![ER図](docs/er-diagram.png)
