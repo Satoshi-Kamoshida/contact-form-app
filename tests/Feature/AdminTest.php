@@ -67,4 +67,65 @@ class AdminTest extends TestCase
         $response->assertSee('山田');
         $response->assertDontSee('佐藤');
     }
+
+    public function test_authenticated_user_can_view_contact_detail(): void
+    {
+        $user = User::factory()->create();
+
+        $category = Category::create([
+            'content' => '商品の交換について',
+        ]);
+
+        $contact = Contact::create([
+            'category_id' => $category->id,
+            'first_name' => '山田',
+            'last_name' => '太郎',
+            'gender' => 1,
+            'email' => 'yamada@example.com',
+            'tel' => '09012345678',
+            'address' => '東京都',
+            'building' => 'テストビル101',
+            'detail' => 'お問い合わせ内容です',
+        ]);
+
+        $response = $this->actingAs($user)->get("/admin/contacts/{$contact->id}");
+
+        $response->assertStatus(200);
+        $response->assertViewIs('admin.show');
+        $response->assertSee('山田');
+        $response->assertSee('太郎');
+        $response->assertSee('yamada@example.com');
+        $response->assertSee('商品の交換について');
+        $response->assertSee('お問い合わせ内容です');
+    }
+
+    public function test_admin_can_delete_contact(): void
+    {
+        $user = User::factory()->create();
+
+        $category = Category::create([
+            'content' => '商品の交換について',
+        ]);
+
+        $contact = Contact::create([
+            'category_id' => $category->id,
+            'first_name' => '山田',
+            'last_name' => '太郎',
+            'gender' => 1,
+            'email' => 'yamada@example.com',
+            'tel' => '09012345678',
+            'address' => '東京都',
+            'building' => null,
+            'detail' => 'お問い合わせ内容です',
+        ]);
+
+        $response = $this->actingAs($user)
+            ->delete("/admin/contacts/{$contact->id}");
+
+        $response->assertRedirect('/admin');
+
+        $this->assertDatabaseMissing('contacts', [
+            'id' => $contact->id,
+        ]);
+    }
 }
