@@ -19,4 +19,5 @@ Route::middleware('auth')->group(function () {
         'update',
         'destroy',
     ]);
+    Route::get('/contacts/export', [ContactController::class, 'export']);
 });
