@@ -42,4 +42,11 @@ class ContactController extends Controller
 
         return ContactResource::collection($contacts);
     }
+
+    public function show(Contact $contact)
+    {
+        $contact->load(['category', 'tags']);
+
+        return new ContactResource($contact);
+    }
 }
