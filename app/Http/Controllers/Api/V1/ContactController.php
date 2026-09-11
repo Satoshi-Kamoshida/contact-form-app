@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\IndexContactRequest;
+use App\Http\Requests\Api\V1\StoreContactRequest;
 use App\Http\Resources\ContactResource;
 use App\Models\Contact;
 
@@ -48,5 +49,30 @@ class ContactController extends Controller
         $contact->load(['category', 'tags']);
 
         return new ContactResource($contact);
+    }
+
+    public function store(StoreContactRequest $request)
+    {
+        $validated = $request->validated();
+
+        $contact = Contact::create([
+            'first_name' => $validated['first_name'],
+            'last_name' => $validated['last_name'],
+            'gender' => $validated['gender'],
+            'email' => $validated['email'],
+            'tel' => $validated['tel'],
+            'address' => $validated['address'],
+            'building' => $validated['building'] ?? null,
+            'category_id' => $validated['category_id'],
+            'detail' => $validated['detail'],
+        ]);
+
+        $contact->tags()->attach($validated['tag_ids'] ?? []);
+
+        $contact->load(['category', 'tags']);
+
+        return (new ContactResource($contact))
+            ->response()
+            ->setStatusCode(201);
     }
 }
